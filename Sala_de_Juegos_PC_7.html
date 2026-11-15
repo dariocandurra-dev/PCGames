@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sala de Juegos PC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#1a2a94; --azul-hondo:#101c6e; --azul-noche:#000a3a; --azul-borde:#3e52c9;
+  --cian:#5ee6e6; --amarillo:#ffe45c; --texto:#dce2f5; --tenue:#9aa6d8;
+  --display:'VT323','Lucida Console',monospace;
+  --cuerpo:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--azul);color:var(--texto);font:15px/1.5 var(--cuerpo);display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amarillo);outline-offset:2px}
+a{color:var(--cian)}
+
+header{display:flex;align-items:center;gap:20px;padding:12px 22px;background:var(--azul-hondo);border-bottom:2px solid var(--cian);flex-wrap:wrap}
+h1{font:400 42px/1 var(--display);margin:0;color:var(--amarillo);letter-spacing:1px;text-shadow:3px 3px 0 #000}
+h1 small{font-size:24px;color:var(--cian);text-shadow:none;margin-left:8px}
+.buscador{flex:1;min-width:220px;display:flex;gap:8px}
+input,select,textarea{background:var(--azul-noche);border:1px solid var(--azul-borde);padding:8px 10px;border-radius:2px}
+.buscador input{flex:1}
+input::placeholder,textarea::placeholder{color:var(--tenue)}
+.btn{display:inline-block;background:var(--cian);color:#081050;border:0;padding:8px 15px;font-weight:600;cursor:pointer;border-radius:2px;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--amarillo)}
+.btn:disabled{opacity:.55;cursor:default;background:var(--cian)}
+.btn.sec{background:transparent;color:var(--texto);border:1px solid var(--azul-borde)}
+.btn.sec:hover{border-color:var(--cian);color:var(--cian)}
+.btn.sec[aria-pressed="true"]{border-color:var(--amarillo);color:var(--amarillo)}
+.btn.chico{padding:6px 10px;font-size:13px;margin-top:10px}
+
+.cuerpo{flex:1;display:grid;grid-template-columns:250px 1fr;min-height:0}
+nav{background:var(--azul-hondo);border-right:2px solid var(--azul-borde);padding:16px 0;overflow-y:auto}
+nav h2{font:400 22px/1 var(--display);color:var(--cian);margin:18px 20px 8px}
+nav h2:first-child{margin-top:0}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;padding:6px 20px;cursor:pointer}
+nav button:hover{color:var(--amarillo)}
+nav button[aria-current="true"]{background:var(--cian);color:#081050;font-weight:600}
+nav small{display:block;color:var(--tenue);font-size:12px;line-height:1.3;font-weight:400}
+nav button[aria-current="true"] small{color:#1a2a6e}
+
+main{overflow-y:auto;padding:22px 28px 40px}
+.cabecera h2{font:400 36px/1 var(--display);margin:0;color:var(--amarillo)}
+.cabecera p{margin:6px 0 20px;color:var(--tenue);max-width:75ch}
+
+.grilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:18px}
+.juego{background:var(--azul-hondo);border:1px solid var(--azul-borde);cursor:pointer;text-align:left;padding:0;display:flex;flex-direction:column;position:relative}
+.juego:hover{border-color:var(--amarillo)}
+.tapa{aspect-ratio:4/3;display:grid;place-items:center;background:repeating-linear-gradient(0deg,var(--azul-noche) 0 3px,#06104a 3px 4px);overflow:hidden;text-decoration:none}
+.tapa img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.cargando{font:400 20px/1.1 var(--display);color:var(--tenue);padding:10px;text-align:center}
+.sello{font:400 22px/1.1 var(--display);color:var(--amarillo);border:1px solid var(--amarillo);padding:4px 10px;text-align:center;margin:10px}
+.juego.nodisp{opacity:.6}
+.juego.nodisp .sello{color:var(--tenue);border-color:var(--tenue)}
+.info{padding:8px 10px 10px}
+.titulo{font-weight:500;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.anio{color:var(--tenue);font-size:13px}
+.estrella{position:absolute;top:6px;right:6px;background:var(--azul-noche);color:var(--amarillo);font:400 22px/1 var(--display);padding:2px 6px}
+.estado{padding:36px 0;color:var(--tenue);font:400 26px/1.2 var(--display)}
+.nota{color:var(--tenue);font-size:13px;margin:6px 0}
+
+.form-linea{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;margin-bottom:20px;max-width:860px}
+.sitio{cursor:default}
+.sitio-cara{font:400 34px/1 var(--display);color:var(--cian);padding:12px;text-align:center}
+.sitio-borrar{position:absolute;top:6px;right:6px;background:var(--azul-noche);border:0;color:var(--tenue);cursor:pointer;padding:2px 7px}
+.sitio-borrar:hover{color:var(--amarillo)}
+
+/* Reproductor */
+.reproductor{position:fixed;inset:0;background:var(--azul-noche);display:none;flex-direction:column;z-index:10}
+.reproductor.abierto{display:flex}
+.rep-barra{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--azul-hondo);border-bottom:2px solid var(--cian);flex-wrap:wrap}
+.rep-barra h3{font:400 30px/1 var(--display);color:var(--amarillo);margin:0;flex:1;min-width:180px}
+.zoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--tenue);font-size:13px}
+.zoom .btn.sec{padding:5px 9px}
+.zoom input[type=range]{padding:0;width:100px;accent-color:var(--cian);border:0;background:none}
+.zoom output{min-width:42px;color:var(--amarillo);font:400 22px/1 var(--display)}
+.zoom select{padding:5px 6px}
+.rep-cuerpo{flex:1;min-height:0;display:grid;grid-template-columns:1fr 330px}
+.sin-panel .rep-cuerpo{grid-template-columns:1fr}
+.sin-panel .panel{display:none}
+.rep-marco{min-height:0;min-width:0;overflow:auto;display:flex;background:#000}
+.rep-marco:fullscreen{background:#000}
+.lienzo{position:relative;margin:auto;flex:none}
+.lienzo iframe{position:absolute;top:0;left:0;border:0;background:#000;transform-origin:0 0}
+.panel{background:var(--azul-hondo);border-left:2px solid var(--azul-borde);overflow-y:auto;padding:14px 18px 24px}
+.panel h4{font:400 24px/1 var(--display);color:var(--cian);margin:14px 0 6px}
+.panel h4:first-child{margin-top:0}
+.panel ul{margin:0;padding-left:18px}
+.panel li{margin:4px 0;font-size:14px}
+.panel textarea,.panel select{width:100%}
+.rep-aviso{background:var(--amarillo);color:#081050;padding:6px 16px;font-size:14px;font-weight:500}
+.tienda-msg{margin:auto;max-width:56ch;text-align:center;padding:24px}
+.tienda-msg p{margin:0 0 16px}
+.tienda-msg .btn{margin:4px}
+
+/* Diálogo agregar */
+dialog{background:var(--azul-hondo);color:var(--texto);border:2px solid var(--cian);padding:0;width:min(760px,94vw);max-height:88vh}
+dialog::backdrop{background:rgba(0,4,30,.8)}
+.dlg-cab{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--azul-borde)}
+.dlg-cab h3{font:400 30px/1 var(--display);color:var(--amarillo);margin:0}
+.dlg-cuerpo{padding:14px 18px;overflow-y:auto;max-height:calc(88vh - 70px)}
+#ag-form{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+.ag-fila{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--azul-borde)}
+.ag-fila img{width:72px;aspect-ratio:4/3;object-fit:cover;background:#000;image-rendering:pixelated}
+.ag-fila span{display:block;color:var(--tenue);font-size:13px}
+
+footer{padding:7px 22px;background:var(--azul-hondo);border-top:1px solid var(--azul-borde);color:var(--tenue);font-size:12px}
+
+@media (max-width:820px){
+  .cuerpo{grid-template-columns:1fr}
+  nav{border-right:0;border-bottom:2px solid var(--azul-borde);display:flex;overflow-x:auto;padding:8px;gap:4px}
+  nav h2{display:none}
+  nav button{width:auto;flex:none;padding:6px 12px}
+  nav small{display:none}
+  main{padding:16px}
+  .rep-cuerpo{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .panel{border-left:0;border-top:2px solid var(--azul-borde);max-height:35vh}
+  .form-linea,#ag-form{grid-template-columns:1fr}
+  h1{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>SALA DE JUEGOS <small>PC · 1986–1999</small></h1>
+  <form class="buscador" id="buscador">
+    <input id="q" type="search" placeholder="Buscar en la sala, por ejemplo Doom" aria-label="Buscar en la sala">
+    <button class="btn" type="submit">Buscar</button>
+  </form>
+  <button class="btn sec" id="btn-agregar">+ Agregar juego</button>
+</header>
+
+<div class="cuerpo">
+  <nav id="menu" aria-label="Secciones"></nav>
+  <main>
+    <div class="cabecera"><h2 id="seccion-titulo"></h2><p id="seccion-desc"></p></div>
+    <div id="extra"></div>
+    <div class="grilla" id="grilla"></div>
+    <div class="estado" id="estado" hidden></div>
+  </main>
+</div>
+<footer>Los juegos se ejecutan online desde las colecciones de emulación de archive.org. Los de CD-ROM pueden tardar en cargar la primera vez. Favoritos, notas y ajustes quedan guardados en este navegador.</footer>
+
+<div class="reproductor" id="rep" role="dialog" aria-modal="true" aria-labelledby="rep-titulo">
+  <div class="rep-barra">
+    <h3 id="rep-titulo"></h3>
+    <div class="zoom" id="zoom-controles">
+      <span>Tamaño</span>
+      <button class="btn sec" data-zoom="1">1×</button>
+      <button class="btn sec" data-zoom="2">2×</button>
+      <button class="btn sec" data-zoom="3">3×</button>
+      <button class="btn sec" data-zoom="auto">Ajustar</button>
+      <input type="range" id="zoom" min="0.5" max="5" step="0.1" aria-label="Tamaño de pantalla">
+      <output id="zoom-val"></output>
+      <select id="encuadre" aria-label="Encuadre" title="Si el juego se ve cortado o con bordes negros, probá otra resolución">
+        <option value="640x480">Pantalla 640×480 (la mayoría)</option>
+        <option value="640x400">Pantalla 640×400</option>
+        <option value="800x600">Pantalla 800×600 (SVGA)</option>
+        <option value="1024x768">Pantalla 1024×768</option>
+      </select>
+    </div>
+    <button class="btn sec" id="rep-full">Pantalla completa</button>
+    <button class="btn sec" id="rep-panel-btn">Controles</button>
+    <button class="btn sec" id="rep-fav">☆ Favorito</button>
+    <a class="btn sec" id="rep-link" target="_blank" rel="noopener">archive.org</a>
+    <button class="btn" id="rep-cerrar">Cerrar</button>
+  </div>
+  <div class="rep-aviso" id="rep-aviso" hidden></div>
+  <div class="rep-cuerpo">
+    <div class="rep-marco" id="rep-marco"></div>
+    <aside class="panel" id="panel-controles" aria-label="Controles"></aside>
+  </div>
+</div>
+
+<dialog id="dlg-agregar" aria-labelledby="ag-titulo">
+  <div class="dlg-cab"><h3 id="ag-titulo">Agregar juego</h3><button class="btn" id="ag-cerrar">Listo</button></div>
+  <div class="dlg-cuerpo">
+    <p class="nota">Busca en las colecciones jugables online de archive.org. Elegí el género y tocá "Agregar" en el resultado correcto.</p>
+    <form id="ag-form">
+      <input id="ag-q" type="search" placeholder="Nombre del juego, por ejemplo Prehistorik" aria-label="Nombre del juego">
+      <select id="ag-cat" aria-label="Género"></select>
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+    <div id="ag-res"></div>
+  </div>
+</dialog>
+
+<script>
+/* ===================== CATÁLOGO =====================
+   Cada línea: categoría | título | año | perfil de controles | identificador en archive.org | peso en MB
+   Identificadores verificados uno por uno en archive.org (todos con emulador configurado). Los que tienen el identificador vacío (ej. Detroit) se buscan en archive.org al abrirlos.
+   Perfil TIENDA = juego que no se puede jugar online: se ofrece la compra legal. */
+const CATALOGO_TXT = `
+aventuras|The Secret of Monkey Island|1990|scumm|monkey_dos|3
+aventuras|Monkey Island 2: LeChuck's Revenge|1991|scumm|msdos_Monkey_Island_2_-_LeChucks_Revenge_1991|7
+aventuras|Indiana Jones and the Fate of Atlantis|1992|scumm|IndianaJones_Atlantis|72
+aventuras|Indiana Jones and the Last Crusade|1989|scumm|msdos_Indiana_Jones_and_The_Last_Crusade_1989|3
+aventuras|Maniac Mansion|1987|scumm|msdos_Maniac_Mansion_1987|0
+aventuras|Zak McKracken and the Alien Mindbenders|1988|scumm|msdos_Zak_McKracken_and_the_Alien_Mindbenders_1988|1
+aventuras|Loom (CD)|1990|loom|msdos_Loom_1990|719
+aventuras|Sam & Max Hit the Road|1993|sammax|sammax_dos|109
+aventuras|Full Throttle|1995|throttle|msdos_Full_Throttle_1995|636
+aventuras|King's Quest V: Absence Makes the Heart Go Yonder|1990|sierra|msdos_Kings_Quest_V_-_Absence_Makes_the_Heart_Go_Yonder_1990|58
+aventuras|King's Quest VI: Heir Today, Gone Tomorrow|1992|sierra|msdos_Kings_Quest_VI_-_Heir_Today_Gone_Tomorrow_1992|219
+aventuras|Space Quest IV: Roger Wilco and the Time Rippers|1991|sierra|msdos_Space_Quest_IV_-_Roger_Wilco_and_the_Time_Rippers_1991|82
+aventuras|Leisure Suit Larry 1 (VGA)|1991|sierra|msdos_Leisure_Suit_Larry_1_-_Land_of_the_Lounge_Lizards_VGA_1991|3
+aventuras|Leisure Suit Larry 3: Passionate Patti|1989|parser|msdos_Leisure_Suit_Larry_3_-_Passionate_Patti_in_Pursuit_of_the_Pulsating_Pectorals_1989|2
+aventuras|Conquests of Camelot|1990|parser|msdos_Conquests_of_Camelot_-_The_Search_for_the_Grail_1990|3
+aventuras|Laura Bow 2: The Dagger of Amon Ra|1992|sierra|msdos_Laura_Bow_2_-_The_Dagger_of_Amon_Ra_1992|224
+aventuras|Freddy Pharkas: Frontier Pharmacist|1993|sierra|msdos_Freddy_Pharkas_Frontier_Pharmacist_1993|9
+aventuras|Police Quest 4: Open Season|1993|sierra|msdos_Police_Quest_4_-_Open_Season_1993|409
+aventuras|Quest for Glory IV: Shadows of Darkness|1993|sierra|msdos_Quest_for_Glory_IV_-_Shadows_of_Darkness_1993|438
+aventuras|Simon the Sorcerer|1993|verbos|msdos_Simon_the_Sorcerer_1993|68
+aventuras|Discworld|1995|clic|msdos_Discworld_1995|381
+accion|Wolfenstein 3D|1992|wolf|msdos_Wolfenstein_3D_1992|1
+accion|Spear of Destiny|1992|wolf|msdos_Spear_of_Destiny_1992|4
+accion|Doom|1993|doom|msdos_DOOM_1993|13
+accion|Doom II: Hell on Earth|1994|doom|doomII|6
+accion|Heretic|1994|heretic|msdos_Heretic_1994|11
+accion|Rise of the Triad: Dark War|1994|doom|msdos_Rise_of_the_Triad_-_Dark_War_1994|15
+accion|Blake Stone: Aliens of Gold (episodio 1)|1993|wolf|Bs-aog-sw1|1
+accion|Duke Nukem 3D|1996|duke3d|DUKE3D_DOS|15
+accion|Quake|1996|quake|QUAKE_201806|8
+accion|Descent|1995|descent|msdos_Descent_Anniversary_Edition_1996|124
+accion|Duke Nukem II (episodio 1)|1993|duke1|duke-nukem2-sw|1
+accion|Commander Keen 4: Secret of the Oracle|1991|keen|Keen4e-sw|1
+accion|Jazz Jackrabbit|1994|plataforma|msdos_Jazz_Jackrabbit_1994|5
+accion|Bio Menace|1993|duke1|msdos_Bio_Menace_1993|2
+accion|Halloween Harry (episodio 1)|1993|plataforma|halloween_harry_shareware|3
+accion|Raptor: Call of the Shadows (episodio 1)|1994|raptor|Raptor-sw1|2
+accion|Tyrian 2000|1999|naves|msdos_Tyrian_2000_1999|6
+peleas|Mortal Kombat|1993|pelea|msdos_Mortal_Kombat_1993|42
+peleas|Street Fighter II: The World Warrior|1993|pelea|msdos_Street_Fighter_II_The_World_Warrior_1993|2
+peleas|Super Street Fighter II Turbo|1995|pelea|dosbox-ssf-2-t_202302|3
+peleas|One Must Fall: 2097|1994|pelea|msdos_One_Must_Fall_2097_1994|13
+peleas|Body Blows|1993|pelea|msdos_Body_Blows_1993|1
+peleas|Ultimate Body Blows|1994|pelea|msdos_Ultimate_Body_Blows_1994|168
+peleas|World Karate Championship|1989|pelea|msdos_World_Karate_Championship_1989|0
+peleas|Budokan: The Martial Spirit|1989|pelea|msdos_Budokan_The_Martial_Spirit_1989|1
+peleas|Bruce Lee|1987|beatemup|msdos_Bruce_Lee_1987|0
+peleas|Pit-Fighter|1991|pelea|msdos_Pit-Fighter_1991|1
+peleas|Panza Kick Boxing|1990|pelea|msdos_Panza_Kick_Boxing_1990|1
+peleas|Double Dragon|1988|beatemup|msdos_Double_Dragon_1988|0
+peleas|Double Dragon II: The Revenge|1989|beatemup|msdos_Double_Dragon_II_-_The_Revenge_1989|1
+peleas|Teenage Mutant Ninja Turtles|1989|beatemup|msdos_Teenage_Mutant_Ninja_Turtles_1989|1
+peleas|Golden Axe|1990|beatemup|msdos_Golden_Axe_1990|1
+futbol|FIFA International Soccer|1994|futbol|msdos_FIFA_International_Soccer_1994|292
+futbol|FIFA Soccer 96|1995|futbol|msdos_FIFA_Soccer_96_1995|409
+futbol|International Sensible Soccer|1994|sensible|msdos_International_Sensible_Soccer_1994|1
+futbol|Sensible World of Soccer|1995|sensible|msdos_Sensible_World_of_Soccer_1995|158
+futbol|Kick Off 2|1990|sensible|msdos_Kick_Off_2_1990|0
+futbol|Goal!|1993|sensible|msdos_Goal_1993|1
+futbol|World Cup USA '94|1994|futbol|msdos_World_Cup_USA_94_1994|161
+futbol|Football Glory|1995|sensible|msdos_Football_Glory_1995|1
+futbol|MicroProse Pro Soccer|1989|futbol|msdos_Microprose_Pro_Soccer_1989|0
+futbol|PC Fútbol|1993|manager|msdos_PC_Futbol_1993|1
+futbol|PC Fútbol 3.0|1994|manager|msdos_PC_Futbol_3.0_1994|3
+futbol|PC Fútbol 4.0|1995|manager|msdos_PC_Futbol_4.0_1995|12
+futbol|PC Fútbol 5.0|1996|manager|msdos_PC_Futbol_5.0_1996|11
+futbol|Championship Manager 93/94|1993|manager|msdos_Championship_Manager_93-94_1993|1
+futbol|Championship Manager 2|1995|manager|msdos_Championship_Manager_2_1995|302
+futbol|Premier Manager 3|1994|manager|msdos_Premier_Manager_3_1994|2
+carreras|World Circuit (Formula One Grand Prix)|1992|carreras|msdos_World_Circuit_1992|10
+carreras|Grand Prix Circuit|1988|carreras|grand_prix_circuit_1988|0
+carreras|Stunts|1990|stunts|msdos_Stunts_1990|1
+carreras|Indianapolis 500: The Simulation|1989|carreras|msdos_Indianapolis_500_The_Simulation_1989|0
+carreras|IndyCar Racing|1993|carreras|msdos_IndyCar_Racing_1993|6
+carreras|IndyCar Racing II|1996|carreras|msdos_IndyCar_Racing_II_1996|148
+carreras|The Need for Speed|1995|carreras|msdos_Need_for_Speed_The_1995|505
+carreras|Test Drive III: The Passion|1990|carreras|msdos_Test_Drive_III_The_Passion_1990|1
+carreras|Lotus: The Ultimate Challenge|1993|carreras|msdos_Lotus_-_The_Ultimate_Challenge_1993|1
+carreras|Whiplash (Fatal Racing)|1995|carreras|msdos_Whiplash_1995|530
+carreras|Death Rally|1996|carreras|msdos_Death_Rally_1996|677
+carreras|Destruction Derby|1995|carreras|msdos_Destruction_Derby_1995|572
+carreras|Micro Machines|1994|carreras|msdos_Micro_Machines_1994|0
+carreras|Network Q RAC Rally|1994|carreras|msdos_Network_Q_RAC_Rally_1994|4
+carreras|NASCAR Racing|1994|carreras|msdos_NASCAR_Racing_1994|106
+carreras|Out Run|1989|carreras|Outrun_DOS|0
+carreras|Turbo Out Run|1990|carreras|msdos_Turbo_Out_Run_1990|1
+carreras|Hard Drivin'|1990|carreras|msdos_Hard_Drivin_1990|0
+carreras|Wacky Wheels|1994|carreras|msdos_Wacky_Wheels_1994|17
+aviones|Secret Weapons of the Luftwaffe|1992|vuelo|msdos_Secret_Weapons_of_the_Luftwaffe_CD-ROM_1992|2
+aviones|Red Baron|1990|vuelo|msdos_Red_Baron_1990|20
+aviones|Blue Max: Aces of the Great War|1990|vuelo|msdos_Blue_Max_-_Aces_of_the_Great_War_1990|1
+aviones|Knights of the Sky|1990|vuelo|knights_dos|1
+aviones|Chuck Yeager's Advanced Flight Trainer|1987|vuelo|msdos_Chuck_Yeagers_Advanced_Flight_Trainer_1987|0
+aviones|F-19 Stealth Fighter|1988|vuelo|f-19_20240729|1
+aviones|F-14 Tomcat|1990|vuelo|msdos_F-14_Tomcat_1990|1
+aviones|A-10 Tank Killer|1989|vuelo|msdos_A-10_Tank_Killer_1989|1
+aviones|B-17 Flying Fortress|1992|vuelo|msdos_B-17_Flying_Fortress_1992|3
+aviones|Air Warrior|1992|vuelo|msdos_Air_Warrior_1992|0
+aviones|JetFighter: The Adventure|1988|vuelo|msdos_JetFighter_The_Adventure_1988|1
+aviones|Tornado|1994|vuelo|msdos_Tornado_Operation_Desert_Storm_1994|24
+aviones|Fleet Defender|1994|vuelo|msdos_Fleet_Defender_1994|361
+aviones|LHX Attack Chopper|1990|vuelo|msdos_LHX_Attack_Chopper_1990|0
+aviones|Gunship 2000|1993|vuelo|msdos_Gunship_2000_CD-ROM_Edition_1993|5
+aviones|Comanche: Maximum Overkill|1994|vuelo|msdos_Comanche_CD_1994|14
+aviones|Pacific Strike|1994|vuelo|msdos_Pacific_Strike_1994|18
+aviones|Microsoft Flight Simulator 5.1|1993|vuelo|msdos_Microsoft_Flight_Simulator_v5.1_1993|105
+aviones|Wing Commander|1990|espacio|msdos_Wing_Commander_1990|29
+aviones|Wing Commander II|1992|espacio|msdos_Wing_Commander_II_Deluxe_Edition_1992|24
+aviones|Star Wars: X-Wing|1994|espacio|msdos_Star_Wars_X-Wing_Collectors_CD-ROM_1994|53
+aviones|Star Wars: TIE Fighter|1995|espacio|msdos_Star_Wars_TIE_Fighter_Collectors_CD-ROM_1995|412
+estrategia|Sid Meier's Civilization|1991|civ|CIVILIZATION_201902|2
+estrategia|Sid Meier's Colonization|1994|civ|msdos_Sid_Meiers_Colonization_1994|304
+estrategia|Master of Orion|1993|mouse|msdos_Master_of_Orion_1993|5
+estrategia|Master of Orion II: Battle at Antares|1996|mouse|msdos_Master_of_Orion_II_-_Battle_at_Antares_1996|171
+estrategia|SimCity|1989|mouse|msdos_SimCity_1989|6
+estrategia|SimCity 2000|1993|mouse|SimCity2000|5
+estrategia|Dune II: The Building of a Dynasty|1992|dune2|msdos_Dune_2_-_The_Building_of_a_Dynasty_1992|10
+estrategia|Transport Tycoon Deluxe|1995|mouse|msdos_Transport_Tycoon_Deluxe_1995|279
+estrategia|Railroad Tycoon|1990|mouse|railroad_tycoon_1990|1
+estrategia|Theme Park|1994|mouse|msdos_Theme_Park_1994|89
+estrategia|X-COM: UFO Defense|1994|mouse|ufo-enemy-unknown|3
+estrategia|Populous II: Trials of the Olympian Gods|1993|mouse|msdos_Populous_II_-_Trials_of_the_Olympian_Gods_1993|27
+estrategia|The Settlers (Serf City)|1994|mouse|msdos_Serf_City_-_Life_is_Feudal_1994|305
+estrategia|Caesar II|1995|mouse|msdos_Caesar_2_1995|83
+estrategia|Warcraft II|1995|TIENDA||0
+estrategia|Command & Conquer|1995|rts|msdos_Command__Conquer_1995|1253
+estrategia|Heroes of Might and Magic II|1996|TIENDA||0
+estrategia|Theme Hospital|1997|TIENDA||0
+estrategia|Age of Empires|1997|TIENDA||0
+estrategia|Age of Empires II|1999|TIENDA||0
+estrategia|StarCraft|1998|TIENDA||0
+deportes|NHL 94|1993|deporte|msdos_NHL_94_1993|5
+deportes|Lakers versus Celtics and the NBA Playoffs|1989|deporte|msdos_Lakers_versus_Celtics_and_the_NBA_Playoffs_1989|0
+deportes|TV Sports: Basketball|1990|deporte|msdos_TV_Sports_-_Basketball_1990|0
+deportes|Wayne Gretzky Hockey|1989|deporte|msdos_Wayne_Gretzky_Hockey_1989|0
+deportes|Links 386 Pro|1992|mouse|links-386-pro-version-1.07|48
+deportes|PGA Tour Golf|1990|mouse|msdos_PGA_Tour_Golf_1990|0
+deportes|Jack Nicklaus' Greatest 18 Holes|1988|mouse|msdos_Jack_Nicklaus_Greatest_18_Holes_of_Major_Championship_Golf_1988|0
+deportes|Sensible Golf|1994|mouse|msdos_Sensible_Golf_1994|1
+deportes|California Games II|1990|deporte|msdos_California_Games_II_1990|1
+deportes|Winter Games|1986|deporte|msdos_Winter_Games_1986|0
+deportes|The Games: Summer Challenge|1992|deporte|msdos_The_Games_-_Summer_Challenge_1992|2
+deportes|4-D Boxing|1991|deporte|msdos_4-D_Boxing_1991|1
+deportes|4D Sports Tennis|1990|deporte|msdos_4D_Sports_Tennis_1990|1
+deportes|Jimmy Connors Pro Tennis Tour|1990|deporte|msdos_Jimmy_Connors_Pro_Tennis_Tour_1990|0
+deportes|HardBall II|1989|deporte|msdos_HardBall_II_1989|1
+deportes|Skate or Die!|1988|deporte|msdos_Skate_or_Die_1988|1
+deportes|Pinball Dreams|1992|pinball|msdos_Pinball_Dreams_1992|1
+deportes|Pinball Fantasies|1992|pinball|msdos_Pinball_Fantasies_1992|1
+deportes|Epic Pinball|1993|pinball|epic_pinball_11|1
+rol|Prince of Persia|1990|pop|msdos_Prince_of_Persia_1990|0
+rol|Prince of Persia 2: The Shadow and the Flame|1993|pop|Prince_of_Persia_2_The_Shadow_and_The_Flame|5
+rol|Another World (Out of This World)|1991|anotherworld|msdos_Out_of_This_World_1991|1
+rol|Flashback|1993|flashback|msdos_Flashback_-_The_Quest_for_Identity_1993|107
+rol|Alone in the Dark|1992|aitd|msdos_Alone_in_the_Dark_1992|272
+rol|The Elder Scrolls: Arena|1994|rpg|ARENA_201902|9
+rol|The Elder Scrolls II: Daggerfall|1996|rpg|msdos_Elder_Scrolls_The_-_Daggerfall_1996|346
+rol|Ultima VI: The False Prophet|1990|rpg|msdos_Ultima_VI_-_The_False_Prophet_1990|2
+rol|Ultima Underworld: The Stygian Abyss|1992|rpg|msdos_Ultima_Underworld_-_The_Stygian_Abyss_1992|5
+rol|Eye of the Beholder|1991|rpg|msdos_Eye_of_the_Beholder_1991|1
+rol|Might and Magic: World of Xeen|1994|rpg|msdos_Might_and_Magic_45_-_World_of_Xeen_1994|33
+rol|Pool of Radiance|1988|rpg|POR_POR|5
+rol|Betrayal at Krondor|1993|rpg|msdos_Betrayal_at_Krondor_1993|504
+rol|Ultima VII: The Black Gate|1992|TIENDA||0
+rol|Lands of Lore|1993|TIENDA||0
+rol|Diablo|1996|TIENDA||0
+rol|Fallout|1997|TIENDA||0
+puzzle|Where in the World Is Carmen Sandiego? (Deluxe)|1990|carmen|msdos_Where_in_the_World_is_Carmen_Sandiego_Deluxe_1990|4
+puzzle|Where in Time Is Carmen Sandiego?|1989|carmen|msdos_Where_in_Time_is_Carmen_Sandiego_1989|1
+puzzle|Where in Europe Is Carmen Sandiego?|1988|carmen|msdos_Where_in_Europe_is_Carmen_Sandiego_1988|0
+puzzle|Where in the U.S.A. Is Carmen Sandiego?|1986|carmen|msdos_Where_in_the_USA_is_Carmen_Sandiego_1986|0
+puzzle|Tetris|1987|tetris|tetris_1987|0
+puzzle|Welltris|1989|tetris|msdos_Welltris_1989|0
+puzzle|Lemmings|1991|lemmings|lemmings_20230825|1
+puzzle|Lemmings 2: The Tribes|1992|lemmings|lemmings_2_the_tribes_1992|2
+puzzle|The Incredible Machine|1992|clic|the_incredible_machine_1992|0
+puzzle|Pipe Dream|1989|pipedream|msdos_Pipe_Dream_1989|0
+puzzle|Lode Runner: The Legend Returns|1994|loderunner|LodeRunnerTheLegendReturns|5
+puzzle|Shanghai II: Dragon's Eye|1990|clic|msdos_Shanghai_II_-_Dragons_Eye_1990|1
+puzzle|The Castle of Dr. Brain|1991|clic|msdos_Castle_of_Dr._Brain_1991|2
+estrategia|Mad TV|1991|mouse|mad-tv|1
+estrategia|Detroit|1993|mouse||0
+estrategia|Sid Meier's Pirates!|1987|mouse|msdos_Sid_Meiers_Pirates_1987|3
+estrategia|Centurion: Defender of Rome|1990|mouse|msdos_Centurion_-_Defender_of_Rome_1990|13
+estrategia|Lords of the Realm|1994|mouse|msdos_Lords_of_the_Realm_1994|36
+estrategia|Defender of the Crown|1987|mouse|msdos_Defender_of_the_Crown_1987|1
+estrategia|Syndicate Plus|1994|mouse|msdos_Syndicate_Plus_1994|33
+estrategia|Cannon Fodder|1993|mouse|msdos_Cannon_Fodder_1993|67
+estrategia|The Settlers II (Die Siedler II)|1997|mouse|die_siedler_2_151|15
+estrategia|SimEarth: The Living Planet|1990|mouse|msdos_SimEarth_-_The_Living_Planet_1990|17
+estrategia|SimAnt: The Electronic Ant Colony|1991|mouse|msdos_SimAnt_-_The_Electronic_Ant_Colony_1991|2
+estrategia|Monopoly Deluxe|1992|mouse|msdos_Monopoly_Deluxe_1992|3
+estrategia|Capitalism|1995|mouse|msdos_Capitalism_1995|59
+estrategia|Utopia: The Creation of a Nation|1991|mouse|msdos_Utopia_-_The_Creation_of_a_Nation_1991|14
+estrategia|Scorched Earth|1991|general|msdos_Scorched_Earth_1991|1
+carreras|Street Rod|1989|carreras|msdos_Street_Rod_1989|2
+carreras|Street Rod 2: The Next Generation|1991|carreras|msdos_Street_Rod_2_The_Next_Generation_1991|2
+carreras|Motor City|1994|carreras|msdos_Motor_City_1994|21
+carreras|Power Drive|1994|carreras|msdos_Power_Drive_1994|6
+carreras|Test Drive|1987|carreras|msdos_Test_Drive_1987|1
+carreras|Grand Prix Unlimited|1992|carreras|msdos_Grand_Prix_Unlimited_1992|1
+carreras|The Need for Speed: Special Edition|1996|carreras|msdos_The_Need_for_Speed_-_Special_Edition_1996|440
+aventuras|Space Quest VI: Roger Wilco in the Spinal Frontier|1995|sierra|msdos_Space_Quest_VI_-_Roger_Wilco_in_the_Spinal_Frontier_1995|585
+aventuras|Leisure Suit Larry 6: Shape Up or Slip Out|1993|sierra|msdos_Leisure_Suit_Larry_6_-_Shape_Up_or_Slip_Out_1993|448
+aventuras|Leisure Suit Larry 2: Looking for Love|1988|parser|msdos_Leisure_Suit_Larry_2_-_Goes_looking_for_Love_in_Several_Wrong_Places_1988|2
+aventuras|Rise of the Dragon|1990|clic|msdos_Rise_of_the_Dragon_1990|14
+aventuras|Heart of China|1991|clic|msdos_Heart_of_China_1991|26
+aventuras|The Adventures of Willy Beamish|1991|clic|msdos_Adventures_of_Willy_Beamish_The_1991|244
+aventuras|Return to Zork|1993|clic|msdos_Return_to_Zork|99
+aventuras|Codename: Iceman|1989|sierra|msdos_Codename_ICEMAN_1989|15
+aventuras|Zork I: The Great Underground Empire|1980|parser|msdos_Zork_I_-_The_Great_Underground_Empire_1980|1
+accion|Prehistorik 2|1993|plataforma|msdos_Prehistorik_2_1993|5
+accion|Prehistorik|1991|plataforma|msdos_Prehistorik_1991|1
+accion|Disney's Aladdin|1994|plataforma|msdos_Disneys_Aladdin_1994|3
+accion|Commander Keen: Volume One|1990|keen|commander_keen_volume_one_131|3
+accion|Dangerous Dave in the Deserted Pirates' Hideout|1990|plataforma|msdos_Dangerous_Dave_in_the_Deserted_Pirates_Hideout_1990|10
+accion|Crystal Caves|1991|plataforma|msdos_Crystal_Caves_1991|1
+accion|Shadow Warrior|1997|duke3d|msdos_Shadow_Warrior_1997|555
+accion|Jill of the Jungle|1992|plataforma|msdos_Jill_of_the_Jungle_1992|5
+accion|Xargon Trilogy|1993|plataforma|Xargon_Trilogy|8
+accion|Batman Returns|1993|plataforma|msdos_Batman_Returns_1993|27
+peleas|Karateka|1986|pelea|msdos_Karateka_1986|5
+futbol|European Championship 1992|1992|futbol|msdos_European_Championship_1992_1992|21
+futbol|Manchester United Europe|1991|futbol|msdos_Manchester_United_Europe_1991|1
+futbol|Striker|1992|futbol|msdos_Striker_1992_1992|13
+aviones|Su-27 Flanker|1996|vuelo|msdos_Su-27_Flanker_1996|240
+deportes|John Madden Football|1989|deporte|msdos_John_Madden_Football_1989|1
+deportes|PC Basket 3.0|1995|manager|msdos_PC_Basket_3.0_1995|3
+rol|Elvira: Mistress of the Dark|1990|rpg|msdos_Elvira_-_Mistress_of_the_Dark_1990|4
+rol|Eye of the Beholder II: The Legend of Darkmoon|1991|rpg|msdos_Eye_of_the_Beholder_II_-_The_Legend_of_Darkmoon_1991|10
+rol|Ultima Underworld II: Labyrinth of Worlds|1993|rpg|msdos_Ultima_Underworld_2_-_Labyrinth_of_Worlds_1993|6
+puzzle|Number Munchers|1990|general|msdos_Number_Munchers_1990|6
+puzzle|The Oregon Trail|1990|general|msdos_Oregon_Trail_The_1990|1
+accion|Titus the Fox: To Marrakech and Back|1992|plataforma|msdos_Titus_the_Fox_-_To_Marrakech_and_Back_1992|1
+accion|Zool|1993|plataforma|msdos_Zool_1993|2
+accion|Zool 2|1994|plataforma|msdos_Zool_2_1994|2
+puzzle|Bumpy|1989|general|msdos_Bumpy_1989|0
+aventuras|The Legend of Kyrandia: Book One|1992|clic|msdos_Legend_of_Kyrandia_Book_1_1992|5
+aventuras|The Legend of Kyrandia: Book Two – The Hand of Fate|1993|clic|msdos_Legend_of_Kyrandia_Book_2_-_The_Hand_of_Fate_1993|10
+aventuras|The Legend of Kyrandia: Book Three – Malcolm's Revenge|1994|clic|msdos_Legend_of_Kyrandia_Book_3_-_Malcolms_Revenge_1994|20
+carreras|Grand Prix 2|1995|carreras|msdos_Grand_Prix_2_1995|576
+estrategia|Sid Meier's Civilization II|1996|TIENDA||0
+aviones|Red Baron II|1997|TIENDA||0
+estrategia|Command & Conquer: Red Alert|1996|TIENDA||0
+estrategia|Commandos: Behind Enemy Lines|1998|TIENDA||0
+peleas|Mortal Kombat II|1994|pelea|msdos_Mortal_Kombat_II_1994|52
+peleas|Mortal Kombat 3|1995|pelea|msdos_Mortal_Kombat_3_1995|336
+peleas|Mortal Kombat Trilogy|1997|pelea|msdos_Mortal_Kombat_Trilogy_1997|585
+peleas|Super Street Fighter II: The New Challengers|1996|pelea|SSF2_DOS|21
+futbol|Italy 90 Soccer|1989|futbol|msdos_Italy_90_Soccer_1989|0
+futbol|World Cup 90|1990|futbol|msdos_World_Cup_90_1990|0
+deportes|NBA Jam Tournament Edition|1995|deporte|msdos_NBA_Jam_Tournament_Edition_1995|348
+deportes|International Tennis Open|1994|deporte|msdos_International_Tennis_Open_1994|7
+deportes|Davis Cup Complete Tennis|1996|deporte|msdos_Davis_Cup_Complete_Tennis_1996|242
+deportes|Pete Sampras Tennis 97|1997|deporte|msdos_Pete_Sampras_Tennis_97_1997|570
+deportes|Tennis Elbow|1997|deporte|msdos_Tennis_Elbow_1997|17
+`;
+
+const CATEGORIAS = [
+  {id:'aventuras',  nombre:'Aventuras gráficas',  sub:'Monkey Island, Indiana Jones', desc:'LucasArts, Sierra y las grandes aventuras de point & click.'},
+  {id:'accion',     nombre:'Acción',              sub:'Doom, Wolfenstein, Duke',      desc:'Shooters en primera persona, plataformas de acción y naves.'},
+  {id:'peleas',     nombre:'Peleas',              sub:'Mortal Kombat, Street Fighter', desc:'Uno contra uno y beat \'em up.'},
+  {id:'futbol',     nombre:'Fútbol',              sub:'FIFA, Sensible, PC Fútbol',    desc:'Fútbol jugado y fútbol dirigido desde el banco.'},
+  {id:'carreras',   nombre:'Carreras',            sub:'Grand Prix 2, Stunts, NFS',    desc:'Fórmula 1, IndyCar, rally y autos de calle.'},
+  {id:'aviones',    nombre:'Aviones',             sub:'Dogfight, X-Wing, F-15',       desc:'Simuladores de vuelo, combate aéreo y naves espaciales.'},
+  {id:'estrategia', nombre:'Estrategia',          sub:'Civilization, SimCity, Warcraft', desc:'Imperios, ciudades, ejércitos y empresas.'},
+  {id:'deportes',   nombre:'Otros deportes',      sub:'NBA Jam, hockey, golf',        desc:'Básquet, hockey, golf, tenis, boxeo y pinball.'},
+  {id:'rol',        nombre:'Rol y aventura de acción', sub:'Prince of Persia, Elder Scrolls', desc:'Juegos de rol y aventuras de acción como Prince of Persia y Another World.'},
+  {id:'puzzle',     nombre:'Puzzle e ingenio',    sub:'Carmen Sandiego, Lemmings',    desc:'Para pensar: Carmen Sandiego, Tetris, Lemmings y más.'},
+];
+
+/* ===================== CONTROLES =====================
+   Teclas por defecto de cada familia de juegos. Muchos juegos permiten
+   redefinirlas desde su menú de opciones. */
+const PERFILES = {
+  scumm:   ['Mouse: hacé clic en un verbo (Mirar, Usar, Hablar…) y después en el objeto o personaje.', 'Clic sobre el inventario para usar objetos.', 'F5: guardar y cargar partida.', 'Espacio: pausa.', 'Esc: saltear una escena.', 'Punto (.): saltear una línea de diálogo.'],
+  loom:    ['Mouse: hacé clic en objetos para seleccionarlos y tocá notas en el bastón para tejer hechizos.', 'Los hechizos son secuencias de 4 notas: anotalas.', 'F5: guardar y cargar.', 'Espacio: pausa.'],
+  sammax:  ['Mouse: clic derecho cambia el cursor (caminar, mirar, usar, hablar, recoger).', 'Clic en la caja de cartón (abajo a la izquierda) para el inventario.', 'F5: guardar y cargar.', 'Esc: saltear una escena.'],
+  throttle:['Mouse: mantené apretado el botón izquierdo sobre algo para abrir el menú de acciones (mano, ojos, boca, pie).', 'Clic derecho: inventario.', 'F1: menú de guardar y cargar.', 'En las persecuciones en moto se maneja con el mouse.'],
+  clic:    ['Mouse: hacé clic sobre las cosas para interactuar.', 'Clic derecho: mirar o cambiar de acción (según el juego).', 'Esc o F1: menú del juego.'],
+  parser:  ['Teclado: escribí lo que querés hacer en inglés y Enter (por ejemplo: look, open door, take key, talk to man).', 'Flechas: caminar.', 'F5: guardar, F7: cargar.', 'Guardá seguido: se puede morir.'],
+  sierra:  ['Mouse: clic derecho rota el cursor entre caminar, mirar, usar y hablar.', 'Barra de íconos: llevá el mouse arriba de la pantalla.', 'F5: guardar, F7: cargar.', 'Guardá seguido: en los juegos de Sierra se puede morir.'],
+  verbos:  ['Mouse: elegí la acción en la parte inferior y después el objeto.', 'Clic derecho: acción rápida (mirar o usar).', 'F1 o F5: menú de guardar y cargar.'],
+  bass:    ['Mouse: clic izquierdo para mirar, clic derecho para usar u operar.', 'Llevá el mouse arriba de la pantalla para ver el inventario.', 'F5: guardar y cargar.'],
+  wolf:    ['Flechas: moverse y girar.', 'Ctrl: disparar.', 'Espacio: abrir puertas y activar.', 'Shift (mantener): correr.', 'Alt + flechas: desplazarse de costado.', '1 a 4: elegir arma.', 'Esc: menú.'],
+  doom:    ['Flechas: moverse y girar.', 'Ctrl: disparar.', 'Espacio: abrir puertas y activar interruptores.', 'Shift (mantener): correr.', 'Alt + flechas: desplazarse de costado.', 'Números: elegir arma.', 'Tab: mapa.', 'Esc: menú.'],
+  heretic: ['Flechas: moverse y girar.', 'Ctrl: atacar.', 'Espacio: abrir y activar.', 'Shift: correr.', '[ y ]: elegir artefacto, Enter: usarlo.', 'Re Pág / Av Pág: mirar arriba y abajo.', 'Números: armas. Tab: mapa.'],
+  duke3d:  ['Flechas: moverse y girar.', 'Ctrl: disparar.', 'Espacio: abrir y activar.', 'A: saltar. Z: agacharse.', 'Shift: correr.', 'Números: armas. Tab: mapa.', 'Enter: usar el objeto del inventario.'],
+  quake:   ['Flechas: moverse y girar.', 'Ctrl: disparar.', 'Espacio: saltar.', 'Shift: correr.', 'Números: armas.', 'Esc: menú.'],
+  descent: ['Flechas: girar y apuntar la nave.', 'A: avanzar. Z: retroceder.', 'Q y E: rotar la nave.', 'Ctrl: arma principal. Espacio: arma secundaria.', 'F: bengala. Tab: mapa.'],
+  duke1:   ['Flechas: moverse.', 'Ctrl: saltar.', 'Alt: disparar.', 'Flecha arriba: usar objetos y puertas.'],
+  keen:    ['Flechas: moverse.', 'Ctrl: saltar.', 'Alt: pogo (saltar más alto).', 'Espacio: disparar.', 'Esc: menú.'],
+  plataforma:['Flechas: moverse.', 'Saltar y disparar: Ctrl, Alt o Espacio según el juego (ver menú de opciones).', 'Esc: menú.'],
+  raptor:  ['Mouse o flechas: mover la nave.', 'Ctrl o clic izquierdo: disparar.', 'Alt: cambiar de arma.', 'Espacio: megabomba.'],
+  naves:   ['Flechas: mover la nave.', 'Espacio: disparar.', 'Las teclas exactas se configuran en el menú de opciones.'],
+  pelea:   ['Flechas: moverse, saltar y agacharse.', 'Golpes y patadas: cada juego usa distintas letras. Entrá a Options › Controls (o Keyboard) en el menú inicial para verlas y redefinirlas.', 'Enter: empezar. Esc o F1: pausa o menú.'],
+  beatemup:['Flechas: moverse.', 'Golpear y saltar: Ctrl, Alt o Espacio según el juego.', 'Enter: empezar.'],
+  futbol:  ['Flechas: mover al jugador que tiene la marca.', 'Pase, tiro y centro: según el juego (ver Opciones › Controles); suelen ser A, S y D o Ctrl y Alt.', 'Sin la pelota, el botón de pase cambia de jugador.', 'Esc: pausa y menú.'],
+  sensible:['Flechas: mover al jugador.', 'Un solo botón (Ctrl, Espacio o clic según la configuración): toque corto pasa, mantener tira.', 'Después de patear, las flechas le dan efecto a la pelota.', 'Esc: pausa.'],
+  manager: ['Mouse: todo se maneja con menús.', 'Guardá la partida desde el menú principal al terminar cada fecha.'],
+  carreras:['Flechas: arriba acelera, abajo frena, izquierda y derecha doblan.', 'Cambios manuales (si los activás): A y Z en la mayoría.', 'Teclas F o C: cambiar cámara (según el juego).', 'Esc o P: pausa y menú.'],
+  stunts:  ['Flechas: arriba acelera, abajo frena, izquierda y derecha doblan.', 'A y Z: subir y bajar de marcha (en manual).', 'C: cambiar cámara. Esc: menú.', 'Tiene editor de pistas en el menú principal.'],
+  vuelo:   ['Flechas o joystick: controlar el avión (arriba baja la nariz, abajo la sube).', 'Espacio: disparar.', '+ y - (o 1 a 0): potencia del motor.', 'Estos simuladores usan casi todo el teclado: el manual en archive.org trae la tabla completa.'],
+  espacio: ['Flechas o joystick: dirigir la nave.', 'Espacio o Ctrl: disparar.', '+ y -: velocidad.', 'T: fijar objetivo. Tab o Enter: armas secundarias (según el juego).', 'El manual en archive.org trae la tabla completa de teclas.'],
+  civ:     ['Mouse para menús y ciudades.', 'Teclado numérico: mover unidades.', 'B: fundar ciudad. R: camino. I: irrigar. M: mina. F: fortificar.', 'Espacio: no mover esa unidad este turno.'],
+  mouse:   ['Mouse: clic izquierdo selecciona, clic derecho cancela o muestra información (según el juego).', 'Esc: menú.'],
+  rts:     ['Mouse: clic izquierdo selecciona unidades; arrastrá para seleccionar varias.', 'Clic derecho (o clic izquierdo, según el juego) sobre un lugar u objetivo para dar la orden.', 'Ctrl + número: agrupar unidades; número: seleccionar el grupo.'],
+  dune2:   ['Mouse: clic izquierdo selecciona la unidad, después elegí la orden en el panel derecho (Mover, Atacar…) y hacé clic en el destino.', 'Una unidad por vez: no se pueden seleccionar varias.'],
+  deporte: ['Flechas: moverse.', 'Acciones: Ctrl, Alt o Espacio según el juego; revisá el menú de opciones para ver o cambiar las teclas.', 'Enter o Esc: pausa.'],
+  pinball: ['Shift izquierdo y Shift derecho: flippers.', 'Espacio o flecha abajo: lanzar la bola (según el juego).', 'Enter: empezar.'],
+  pop:     ['Flechas: correr y moverse. Arriba salta, abajo se agacha.', 'Shift: agarrarse de bordes y recoger objetos.', 'Shift + flecha: avanzar con cuidado, paso a paso.', 'Con la espada: Shift ataca, arriba bloquea.', 'Ctrl + A: reiniciar el nivel. Ctrl + G: guardar (desde el nivel 3).'],
+  anotherworld:['Flechas: moverse y saltar.', 'Espacio: patear o disparar; mantenelo para cargar el disparo.', 'C: ingresar el código de nivel (anotalos).'],
+  flashback:['Flechas: moverse.', 'Shift: acción (agarrar, usar).', 'Espacio: sacar el arma y disparar.', 'Enter: inventario.'],
+  aitd:    ['Flechas: moverse.', 'Espacio: realizar la acción elegida (abrir, empujar, pelear).', 'Enter: inventario y elección de acción.', 'F5/F6 o Enter › Save: guardar.'],
+  rpg:     ['Mouse y teclado: los juegos de rol usan muchas teclas.', 'Flechas: moverse en el mundo.', 'El manual en archive.org explica la creación de personajes y las teclas.', 'Guardá seguido.'],
+  carmen:  ['Mouse o teclado según la versión.', 'Viajá siguiendo las pistas, anotá los datos del sospechoso y emití la orden de arresto antes de que se acabe el tiempo.', 'Las versiones originales pedían datos del almanaque incluido: está en archive.org.'],
+  tetris:  ['Flechas izquierda y derecha: mover la pieza.', 'Flecha arriba o Espacio: rotar.', 'Flecha abajo: bajar más rápido.'],
+  lemmings:['Mouse: elegí una habilidad abajo y hacé clic sobre un lemming.', 'P: pausa.', 'El botón del hongo nuclear reinicia el nivel.', 'Anotá las contraseñas de cada nivel.'],
+  pipedream:['Mouse o flechas: elegir la casilla.', 'Clic o Espacio: colocar la pieza de tubería.'],
+  loderunner:['Flechas: moverse y subir escaleras.', 'Z y X: cavar a la izquierda y a la derecha (según configuración).'],
+  chips:   ['Flechas: mover a Chip.', 'Anotá la contraseña de 4 letras de cada nivel.'],
+  general: ['Hacé clic dentro de la pantalla del juego para que tome el teclado y el mouse.', 'Esc suele abrir el menú del juego.'],
+};
+
+/* ===================== DATOS ===================== */
+const COLECCION = 'collection:(softwarelibrary_msdos_games OR softwarelibrary_win3_games)';
+const JUEGOS = CATALOGO_TXT.trim().split('\n').map(l => {
+  const [c, t, a, p, id, mb] = l.split('|');
+  return {c, t, a: +a, p, id: id || null, mb: +mb || 0, n: '', clave: norm(t).replace(/ /g, '_')};
+});
+function norm(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+const $ = id => document.getElementById(id);
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem('pc_' + k)) ?? d; } catch { return d; } };
+const guardar = (k, v) => { try { localStorage.setItem('pc_' + k, JSON.stringify(v)); } catch {} };
+const quitar = k => { try { localStorage.removeItem('pc_' + k); } catch {} };
+
+/* ===================== ARCHIVE.ORG ===================== */
+let nCb = 0;
+function buscarIA(q, filas = 20) {
+  return new Promise((ok, mal) => {
+    const cb = 'iaCb' + (++nCb);
+    const p = new URLSearchParams({q: q + ' AND mediatype:(software)', rows: filas, page: 1, output: 'json', callback: cb});
+    ['identifier', 'title', 'year', 'downloads'].forEach(f => p.append('fl[]', f));
+    p.append('sort[]', 'downloads desc');
+    const s = document.createElement('script');
+    const fin = () => { delete window[cb]; s.remove(); clearTimeout(t); };
+    const t = setTimeout(() => { fin(); mal(new Error('timeout')); }, 15000);
+    window[cb] = d => { fin(); ok(d.response.docs || []); };
+    s.onerror = () => { fin(); mal(new Error('red')); };
+    s.src = 'https://archive.org/advancedsearch.php?' + p;
+    document.body.appendChild(s);
+  });
+}
+const tituloDe = d => Array.isArray(d.title) ? d.title[0] : (d.title || 'Sin título');
+const anioDe = d => parseInt(String(d.year || '').slice(0, 4)) || null;
+const miniatura = id => 'https://archive.org/services/img/' + encodeURIComponent(id);
+
+// Arma la consulta: grupos alternativos separados por ";" y palabras unidas con AND
+function consultaTitulo(q) {
+  const grupos = q.split(';').map(g => g.trim().split(/\s+/)
+    .map(w => w.replace(/[^\p{L}\p{N}]/gu, '')).filter(Boolean).join(' AND ')).filter(Boolean);
+  return 'title:(' + grupos.map(g => '(' + g + ')').join(' OR ') + ')';
+}
+
+// Elige la mejor versión: título parecido, año correcto, más jugada, sin demos
+function puntuar(j, d) {
+  const t = norm(tituloDe(d)), objetivo = norm(j.t), y = anioDe(d);
+  let s = Math.log10((d.downloads || 0) + 1) * 4;
+  if (t === objetivo) s += 60;
+  s -= Math.abs(t.split(' ').length - objetivo.split(' ').length) * 3;
+  if (y) { const dif = Math.abs(y - j.a); s += dif === 0 ? 40 : dif === 1 ? 20 : dif > 4 ? -25 : 0; }
+  if (/\b(demo|preview|beta|trial|shareware|playable|editor|patch|mod|addon|add on|data disk|expansion)\b/.test(t) && !/\b(demo|shareware)\b/.test(objetivo)) s -= 35;
+  return s;
+}
+
+const SIETE_DIAS = 7 * 24 * 3600 * 1000;
+function resolucion(j) {
+  if (j.id) return {id: j.id, alts: []};                   // identificador fijo (catálogo verificado o agregado)
+  const fijo = leer('fijo_' + j.clave, null);
+  const r = leer('res_' + j.clave, null);
+  if (fijo) return {id: fijo, alts: r?.alts || []};
+  if (r && (r.id || Date.now() - r.ts < SIETE_DIAS)) return r;
+  return null;
+}
+
+// Cola con un máximo de 4 consultas simultáneas
+const cola = []; let activas = 0;
+function encolar(fn) { return new Promise(ok => { cola.push([fn, ok]); siguiente(); }); }
+function siguiente() {
+  while (activas < 4 && cola.length) {
+    const [fn, ok] = cola.shift(); activas++;
+    fn().then(ok, () => ok(null)).finally(() => { activas--; siguiente(); });
+  }
+}
+async function resolver(j) {
+  const ya = resolucion(j); if (ya) return ya;
+  return encolar(async () => {
+    const docs = await buscarIA(COLECCION + ' AND ' + consultaTitulo(j.q));
+    // Evita que dos juegos del catálogo apunten a la misma versión (sin repetidos)
+    const usados = leer('usados', {});
+    const orden = docs.map(d => ({d, s: puntuar(j, d)})).sort((a, b) => b.s - a.s)
+      .filter(x => x.s > 0 && (!usados[x.d.identifier] || usados[x.d.identifier] === j.clave));
+    if (orden.length) { usados[orden[0].d.identifier] = j.clave; guardar('usados', usados); }
+    const r = orden.length
+      ? {id: orden[0].d.identifier, alts: orden.slice(0, 8).map(x => ({id: x.d.identifier, t: tituloDe(x.d), y: anioDe(x.d)})), ts: Date.now()}
+      : {id: null, alts: [], ts: Date.now()};
+    guardar('res_' + j.clave, r);
+    return r;
+  });
+}
+
+/* ===================== ESTADO ===================== */
+let vista = 'aventuras', filtro = '';
+const agregados = () => leer('agregados', []);              // {id, t, a, c, p:'general', clave}
+const ocultos = () => new Set(leer('ocultos', []));
+const todos = () => [...JUEGOS, ...agregados()];
+
+/* ===================== MENÚ ===================== */
+function armarMenu() {
+  const nav = $('menu'); nav.innerHTML = '<h2>Géneros</h2>';
+  CATEGORIAS.forEach(c => nav.appendChild(botonMenu(c.id, c.nombre, c.sub)));
+  nav.insertAdjacentHTML('beforeend', '<h2>Lo mío</h2>');
+  nav.appendChild(botonMenu('favoritos', 'Favoritos', 'Marcados con estrella'));
+  nav.appendChild(botonMenu('recientes', 'Jugados hace poco', 'Últimos 24'));
+  nav.appendChild(botonMenu('ocultos', 'Ocultos', 'Los que sacaste de la sala'));
+  nav.appendChild(botonMenu('sitios', 'Otros sitios', 'Páginas para jugar online'));
+}
+function botonMenu(id, nombre, sub) {
+  const b = document.createElement('button'); b.dataset.id = id;
+  b.innerHTML = `${nombre}<small>${sub}</small>`; b.onclick = () => abrir(id); return b;
+}
+
+/* ===================== VISTAS ===================== */
+function abrir(id) {
+  vista = id;
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-current', b.dataset.id === id ? 'true' : 'false'));
+  $('extra').innerHTML = ''; $('grilla').innerHTML = ''; $('estado').hidden = true;
+  const cat = CATEGORIAS.find(c => c.id === id);
+  if (cat) { $('seccion-titulo').textContent = cat.nombre; $('seccion-desc').textContent = cat.desc; return pintar(todos().filter(j => j.c === id)); }
+  if (id === 'busqueda') return pintar(todos().filter(j => norm(j.t).includes(norm(filtro))), true);
+  if (id === 'favoritos' || id === 'recientes') {
+    $('seccion-titulo').textContent = id === 'favoritos' ? 'Favoritos' : 'Jugados hace poco';
+    $('seccion-desc').textContent = id === 'favoritos' ? 'Tus juegos marcados con estrella.' : 'Los últimos juegos que abriste.';
+    const mapa = new Map(todos().map(j => [j.clave, j]));
+    const lista = leer(id, []).map(k => mapa.get(k)).filter(Boolean);
+    if (!lista.length) return aviso(id === 'favoritos' ? 'Todavía no marcaste favoritos. Abrí un juego y tocá la estrella.' : 'Todavía no abriste ningún juego.');
+    return pintar(lista, true);
+  }
+  if (id === 'ocultos') {
+    $('seccion-titulo').textContent = 'Ocultos'; $('seccion-desc').textContent = 'Juegos que sacaste de la sala. Abrilos para volver a mostrarlos.';
+    const oc = ocultos(); const lista = todos().filter(j => oc.has(j.clave));
+    if (!lista.length) return aviso('No ocultaste ningún juego.');
+    return pintar(lista, true, true);
+  }
+  if (id === 'sitios') return vistaSitios();
+}
+function aviso(t) { $('estado').hidden = false; $('estado').textContent = t; }
+
+function pintar(lista, mostrarCategoria = false, incluirOcultos = false) {
+  const oc = ocultos();
+  if (!incluirOcultos) lista = lista.filter(j => !oc.has(j.clave));
+  if (vista === 'busqueda') {
+    $('seccion-titulo').textContent = 'Resultados: ' + filtro;
+    $('seccion-desc').textContent = lista.length + ' juegos de la sala. ¿No está el que buscás? Usá "Agregar juego".';
+  }
+  if (!lista.length) return aviso('No hay juegos para mostrar.');
+  const g = $('grilla');
+  lista.forEach(j => g.appendChild(tarjeta(j, mostrarCategoria)));
+  if (CATEGORIAS.some(c => c.id === vista)) contarDisponibles(lista);
+}
+
+function contarDisponibles(lista) {
+  const base = CATEGORIAS.find(c => c.id === vista).desc;
+  const online = lista.filter(j => j.id).length;
+  $('seccion-desc').textContent = `${base} ${online} para jugar online` + (online < lista.length ? `, ${lista.length - online} para instalar.` : '.');
+}
+
+function tarjeta(j, mostrarCategoria) {
+  const b = document.createElement('button'); b.className = 'juego';
+  const fav = leer('favoritos', []).includes(j.clave);
+  const etiqueta = mostrarCategoria ? CATEGORIAS.find(c => c.id === j.c)?.nombre : (j.id ? 'Agregado por vos' : '');
+  b.innerHTML = `<div class="tapa"><span class="cargando">Buscando…</span></div>
+    ${fav ? '<span class="estrella" aria-label="Favorito">★</span>' : ''}
+    <div class="info"><div class="titulo"></div><div class="anio"></div></div>`;
+  b.querySelector('.titulo').textContent = j.t;
+  const peso = j.mb >= 80 ? `CD · ${j.mb >= 1000 ? (j.mb / 1024).toFixed(1) + ' GB' : j.mb + ' MB'}` : '';
+  b.querySelector('.anio').textContent = [j.a, etiqueta, peso].filter(Boolean).join(' · ');
+  if (peso) b.title = 'Juego en CD: la primera carga puede tardar varios minutos.';
+  b.onclick = () => abrirJuego(j);
+  const tapa = b.querySelector('.tapa');
+  if (j.p === 'TIENDA') { b.classList.add('tienda'); tapa.innerHTML = '<span class="sello">Para instalar</span>'; return b; }
+  resolver(j).then(r => {
+    if (r && r.id) {
+      const img = new Image(); img.alt = ''; img.loading = 'lazy'; img.src = miniatura(r.id);
+      img.onerror = () => { tapa.innerHTML = '<span class="cargando">' + j.t.replace(/</g, '') + '</span>'; };
+      tapa.innerHTML = ''; tapa.appendChild(img);
+    } else if (r) { b.classList.add('nodisp'); tapa.innerHTML = '<span class="sello">No disponible online</span>'; }
+    else tapa.innerHTML = '<span class="cargando">Sin conexión</span>';
+  });
+  return b;
+}
+
+/* ===================== OTROS SITIOS ===================== */
+const SITIOS_INICIALES = [
+  {nombre: 'Biblioteca MS-DOS de archive.org', url: 'https://archive.org/details/softwarelibrary_msdos_games'},
+  {nombre: 'Juegos de Windows 3.x en archive.org', url: 'https://archive.org/details/softwarelibrary_win3_games'},
+  {nombre: 'PLAY-DOS', url: 'https://playdos.albertomartinfernandez.com/'},
+];
+function vistaSitios() {
+  $('seccion-titulo').textContent = 'Otros sitios';
+  $('seccion-desc').textContent = 'Accesos a otras páginas para jugar online. Se abren en una pestaña nueva.';
+  if (!leer('sitios_ok', false)) { guardar('sitios', SITIOS_INICIALES); guardar('sitios_ok', true); }
+  $('extra').innerHTML = `<form class="form-linea" id="form-sitio">
+    <input id="s-nombre" placeholder="Nombre del sitio" required aria-label="Nombre del sitio">
+    <input id="s-url" type="url" placeholder="https://…" required aria-label="Dirección">
+    <button class="btn" type="submit">Agregar sitio</button></form>`;
+  $('form-sitio').onsubmit = e => {
+    e.preventDefault(); const l = leer('sitios', []);
+    l.push({nombre: $('s-nombre').value.trim(), url: $('s-url').value.trim()}); guardar('sitios', l); vistaSitios();
+  };
+  const g = $('grilla'); g.innerHTML = '';
+  leer('sitios', []).forEach((s, i, l) => {
+    const c = document.createElement('div'); c.className = 'juego sitio';
+    c.innerHTML = `<a class="tapa sitio-cara" target="_blank" rel="noopener"></a>
+      <div class="info"><div class="titulo"></div><div class="anio"></div></div>
+      <button class="sitio-borrar" aria-label="Quitar sitio">✕</button>`;
+    c.querySelector('a').href = s.url; c.querySelector('a').textContent = s.nombre;
+    c.querySelector('.titulo').textContent = s.nombre;
+    try { c.querySelector('.anio').textContent = new URL(s.url).hostname; } catch {}
+    c.querySelector('.sitio-borrar').onclick = () => { l.splice(i, 1); guardar('sitios', l); vistaSitios(); };
+    g.appendChild(c);
+  });
+}
+
+/* ===================== AGREGAR JUEGO ===================== */
+function abrirAgregar() {
+  $('dlg-agregar').showModal();
+  $('ag-cat').innerHTML = CATEGORIAS.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+  if (CATEGORIAS.some(c => c.id === vista)) $('ag-cat').value = vista;
+  $('ag-q').focus();
+}
+$('ag-form').onsubmit = async e => {
+  e.preventDefault();
+  const t = $('ag-q').value.trim(); if (!t) return;
+  const out = $('ag-res'); out.innerHTML = '<p class="nota">Buscando en archive.org…</p>';
+  try {
+    const docs = await buscarIA(COLECCION + ' AND ' + consultaTitulo(t), 30);
+    const ya = new Set(todos().map(j => resolucion(j)?.id).filter(Boolean));
+    if (!docs.length) { out.innerHTML = '<p class="nota">No encontré juegos jugables con ese nombre. Probá con el título en inglés o con menos palabras.</p>'; return; }
+    out.innerHTML = '';
+    docs.forEach(d => {
+      const fila = document.createElement('div'); fila.className = 'ag-fila';
+      fila.innerHTML = `<img alt="" loading="lazy"><div><strong></strong><span></span></div><button class="btn"></button>`;
+      fila.querySelector('img').src = miniatura(d.identifier);
+      fila.querySelector('strong').textContent = tituloDe(d);
+      fila.querySelector('span').textContent = [anioDe(d), d.downloads ? d.downloads.toLocaleString('es-AR') + ' partidas' : ''].filter(Boolean).join(' · ');
+      const btn = fila.querySelector('button');
+      if (ya.has(d.identifier)) { btn.textContent = 'Ya está'; btn.disabled = true; }
+      else btn.textContent = 'Agregar';
+      btn.onclick = () => {
+        const l = agregados();
+        l.push({id: d.identifier, t: tituloDe(d), a: anioDe(d), c: $('ag-cat').value, p: 'general', q: '', n: '', clave: 'ag_' + d.identifier});
+        guardar('agregados', l); btn.textContent = 'Agregado ✓'; btn.disabled = true;
+      };
+      out.appendChild(fila);
+    });
+  } catch { out.innerHTML = '<p class="nota">No se pudo conectar con archive.org.</p>'; }
+};
+$('ag-cerrar').onclick = () => { $('dlg-agregar').close(); abrir(vista); };
+
+/* ===================== REPRODUCTOR ===================== */
+let enJuego = null, resJuego = null;
+async function abrirJuego(j) {
+  enJuego = j;
+  $('rep-titulo').textContent = j.t;
+  $('rep').classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+  pintarPanel();
+  if (j.p === 'TIENDA') return mostrarTienda(j);
+  $('rep-marco').innerHTML = '<div class="estado" style="margin:auto">Buscando el juego…</div>';
+  resJuego = await resolver(j);
+  if (!resJuego) return mensajeMarco('No se pudo conectar con archive.org. Revisá la conexión.');
+  if (!resJuego.id) return mostrarTienda(j, true);
+  cargarJuego(resJuego.id);
+  const rec = leer('recientes', []).filter(k => k !== j.clave); rec.unshift(j.clave); guardar('recientes', rec.slice(0, 24));
+}
+function cargarJuego(id) {
+  const pesado = enJuego && enJuego.mb >= 80;
+  $('rep-aviso').hidden = !pesado;
+  if (pesado) $('rep-aviso').textContent = `Juego en CD (${enJuego.mb} MB): la primera vez puede tardar varios minutos en descargar. Las siguientes veces carga más rápido.`;
+  $('rep-link').href = 'https://archive.org/details/' + encodeURIComponent(id);
+  $('rep-link').hidden = false;
+  $('rep-marco').innerHTML = `<div class="lienzo" id="lienzo"><iframe src="https://archive.org/embed/${encodeURIComponent(id)}"
+    allow="fullscreen; autoplay; gamepad" allowfullscreen title="Pantalla del juego"></iframe></div>`;
+  $('zoom-controles').hidden = false;
+  aplicarEscala();
+  pintarVersiones();
+}
+function mensajeMarco(t) { $('rep-marco').innerHTML = `<div class="estado" style="margin:auto;max-width:60ch;text-align:center">${t}</div>`; }
+const GRATIS = {
+  'Command & Conquer: Red Alert': ['https://cncnet.org/red-alert', 'EA lo liberó gratis: se descarga oficialmente desde CnCNet, que además permite jugar online.'],
+};
+function mostrarTienda(j, noEncontrado = false) {
+  const g = GRATIS[j.t];
+  $('zoom-controles').hidden = true; $('rep-link').hidden = true;
+  const q = encodeURIComponent(j.t.replace(/[:(].*$/, '').trim());
+  $('rep-marco').innerHTML = `<div class="tienda-msg">
+    <p>${noEncontrado ? 'Este juego no está en las colecciones jugables online de archive.org.' : g ? 'Este juego no está jugable dentro del navegador.' : 'Este juego es de Windows 95/98 y no se puede emular dentro del navegador.'}</p>
+    <p>Se consigue legalmente, en versiones que andan en Windows actual:</p>
+    ${g ? `<p>${g[1]}</p><p><a class="btn" target="_blank" rel="noopener" href="${g[0]}">Descargar gratis (oficial)</a></p><p class="nota">También está en el Command & Conquer Remastered Collection:</p>` : ''}
+    <p><a class="btn" target="_blank" rel="noopener" href="https://www.gog.com/en/games?query=${q}">Buscar en GOG</a>
+       <a class="btn sec" target="_blank" rel="noopener" href="https://store.steampowered.com/search/?term=${q}">Buscar en Steam</a></p>
+    ${noEncontrado ? '<p class="nota">También podés probar "Agregar juego" con otro nombre: a veces está cargado con un título distinto.</p>' : ''}</div>`;
+}
+
+function pintarPanel() {
+  const j = enJuego, lineas = [...(PERFILES[j.p] || []), ...(j.n ? [j.n] : [])];
+  const fav = leer('favoritos', []).includes(j.clave), oculto = ocultos().has(j.clave);
+  $('rep-fav').textContent = fav ? '★ Favorito' : '☆ Favorito';
+  $('panel-controles').innerHTML = j.p === 'TIENDA' ? '' : `
+    <h4>Controles</h4>
+    <ul>${lineas.map(l => `<li>${l}</li>`).join('') || '<li>Este juego no tiene ficha de controles. Anotá los tuyos abajo.</li>'}</ul>
+    <h4>Para tener en cuenta</h4>
+    <ul>${PERFILES.general.map(l => `<li>${l}</li>`).join('')}
+      <li>Si al arrancar pregunta por la placa de sonido o el video, aceptá con Enter las opciones sugeridas.</li>
+      <li>Si pide una palabra o dato del manual (protección anticopia), la página del juego en archive.org suele traer el manual.</li></ul>
+    <h4>Mis notas</h4>
+    <textarea id="mis-notas" rows="4" placeholder="Anotá teclas, contraseñas de nivel o trucos. Se guardan solas."></textarea>
+    <div id="versiones"></div>
+    <button class="btn sec chico" id="btn-ocultar">${oculto ? 'Volver a mostrar en la sala' : 'Ocultar de la sala'}</button>
+    ${j.id ? '<button class="btn sec chico" id="btn-quitar">Quitar de la sala</button>' : ''}`;
+  if (j.p === 'TIENDA') return;
+  const ta = $('mis-notas'); ta.value = leer('nota_' + j.clave, '');
+  ta.oninput = () => guardar('nota_' + j.clave, ta.value);
+  $('btn-ocultar').onclick = () => {
+    const s = ocultos(); s.has(j.clave) ? s.delete(j.clave) : s.add(j.clave); guardar('ocultos', [...s]); pintarPanel();
+  };
+  if (j.id) $('btn-quitar').onclick = () => { guardar('agregados', agregados().filter(a => a.clave !== j.clave)); cerrar(); };
+}
+function pintarVersiones() {
+  const cont = $('versiones'); if (!cont || !resJuego || resJuego.alts.length < 2) return;
+  cont.innerHTML = `<h4>Versión</h4><p class="nota">Si esta versión no anda o es una demo, probá otra. La elección queda guardada.</p>
+    <select id="sel-version">${resJuego.alts.map(a => `<option value="${a.id}">${(a.t + (a.y ? ' (' + a.y + ')' : '')).replace(/</g, '')}</option>`).join('')}</select>`;
+  const sel = $('sel-version'); sel.value = resJuego.id;
+  sel.onchange = () => { guardar('fijo_' + enJuego.clave, sel.value); resJuego.id = sel.value; cargarJuego(sel.value); };
+}
+function cerrar() {
+  $('rep').classList.remove('abierto'); $('rep-marco').innerHTML = ''; document.body.style.overflow = '';
+  enJuego = null; abrir(vista);
+}
+$('rep-fav').onclick = () => {
+  let f = leer('favoritos', []);
+  f = f.includes(enJuego.clave) ? f.filter(k => k !== enJuego.clave) : [enJuego.clave, ...f];
+  guardar('favoritos', f); pintarPanel(); pintarVersiones();
+};
+$('rep-cerrar').onclick = cerrar;
+$('rep-panel-btn').onclick = () => $('rep').classList.toggle('sin-panel');
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('rep').classList.contains('abierto') && !document.fullscreenElement && !$('dlg-agregar').open) cerrar();
+});
+
+/* ===================== TAMAÑO DE PANTALLA ===================== */
+let zoomModo = leer('zoom', 'auto');
+$('encuadre').value = leer('encuadre2', '640x480');
+function aplicarEscala() {
+  const lienzo = $('lienzo'); if (!lienzo) return;
+  const [w, h] = $('encuadre').value.split('x').map(Number);
+  const marco = $('rep-marco');
+  const auto = Math.max(0.5, Math.min(marco.clientWidth / w, marco.clientHeight / h));
+  const s = zoomModo === 'auto' ? auto : Number(zoomModo);
+  const ifr = lienzo.querySelector('iframe');
+  ifr.style.width = w + 'px'; ifr.style.height = h + 'px'; ifr.style.transform = `scale(${s})`;
+  lienzo.style.width = Math.floor(w * s) + 'px'; lienzo.style.height = Math.floor(h * s) + 'px';
+  $('zoom').value = s.toFixed(1); $('zoom-val').textContent = s.toFixed(1) + '×';
+  document.querySelectorAll('[data-zoom]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.zoom === String(zoomModo))));
+}
+function fijarZoom(v) { zoomModo = v; guardar('zoom', v); aplicarEscala(); }
+$('zoom').oninput = e => fijarZoom(e.target.value);
+document.querySelectorAll('[data-zoom]').forEach(b => b.onclick = () => fijarZoom(b.dataset.zoom));
+$('encuadre').onchange = e => { guardar('encuadre2', e.target.value); aplicarEscala(); };
+window.addEventListener('resize', aplicarEscala);
+document.addEventListener('fullscreenchange', () => setTimeout(aplicarEscala, 60));
+$('rep-full').onclick = () => { const m = $('rep-marco'); if (m.requestFullscreen) m.requestFullscreen(); };
+new ResizeObserver(aplicarEscala).observe($('rep-marco'));
+
+/* ===================== BÚSQUEDA ===================== */
+$('buscador').onsubmit = e => {
+  e.preventDefault(); filtro = $('q').value.trim(); if (!filtro) return;
+  vista = 'busqueda';
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-current', 'false'));
+  $('extra').innerHTML = ''; $('grilla').innerHTML = ''; $('estado').hidden = true;
+  pintar(todos().filter(j => norm(j.t).includes(norm(filtro))), true);
+};
+$('btn-agregar').onclick = abrirAgregar;
+
+armarMenu();
+abrir('aventuras');
+
+</script>
+</body>
+</html>
